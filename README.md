@@ -44,6 +44,7 @@ git_repository(
     name = "com_activestate_rules_vendor",
     remote = "https://github.com/activestate/rules_vendor.git",
     tag = "v0.1.1",
+    sha256 = "784a7b64c3bfc7d4d9e1aa89834ec456911e3b7a932d3f09ad2b901115be5abc",
 )
 load("@com_activestate_rules_vendor//:def.bzl", "vendor_dependencies", "vendor_generate")
 vendor_dependencies()
