@@ -10,18 +10,17 @@ vendor directory:
 ```python
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-http_archive(
+git_repository(
     name = "com_activestate_rules_vendor",
-    strip_prefix = "rules_vendor-0.1.0",
-    urls = ["https://github.com/activestate/rules_vendor/archive/v0.1.0.tar.gz"],
+    remote = "https://github.com/activestate/rules_vendor.git",
+    tag = "v0.1.1",
 )
-
-load("@com_activestate_rules_vendor//def.bzl", "vendor_dependencies", "vendor_generate")
+load("@com_activestate_rules_vendor//:def.bzl", "vendor_dependencies", "vendor_generate")
 vendor_dependencies()
 
 vendor_generate(
     name = "vendor",
-    src = "//:Gophk.lock",
+    src = "//:Gopkg.lock",
     importpath = "github.com/orgname/repo",
 ) 
 ```
