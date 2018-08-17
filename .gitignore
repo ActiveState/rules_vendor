@@ -1,0 +1,4 @@
+bazel-*
+*.swp
+.DS_Store
+.bazel_cache
