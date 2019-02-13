@@ -1,4 +1,4 @@
-load("@bazel_gazelle//:deps.bzl", "go_repository")
+"""This module constructs a vendor package built from a supplied vendor directory."""
 
 _VENDOR_GENERATED_ROOT_BUILD_FILE = """
 load("@bazel_gazelle//:def.bzl", "gazelle")
@@ -93,7 +93,7 @@ def locate_vendor_dir(d):
     # Bazel does not allow unbounded loops, so we fake it by iterating through
     # a list.  The length of our list is the effective "max depth" we will 
     # crawl looking for our vendor directory.
-    for i in ["","","","","","","","","","","",""]:
+    for _ in ["","","","","","","","","","","",""]:
         (ok, path) = scan_dir(d)
         if ok:
             return path
@@ -150,6 +150,6 @@ def env_execute(ctx, arguments, environment = None, **kwargs):
     if environment:
         for k, v in environment.items():
             env_args += ["%s=%s" % (k, v)]
-            return ctx.execute(env_args + arguments, **kwargs)
+        return ctx.execute(env_args + arguments, **kwargs)
     else:
         return ctx.execute(arguments, **kwargs)
