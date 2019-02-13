@@ -42,10 +42,11 @@ vendor directory:
 ```python
 http_archive(
     name = "com_activestate_rules_vendor",
-    urls = ["https://github.com/ActiveState/rules_vendor/archive/v0.1.1.tar.gz"],
-    sha256 = "784a7b64c3bfc7d4d9e1aa89834ec456911e3b7a932d3f09ad2b901115be5abc",
+    urls = ["https://github.com/ActiveState/rules_vendor/archive/v0.1.2.tar.gz"],
+    sha256 = "c579de9fc84951fd0a6043888726e1f31f560ffb81a329694cc6f409da0cc0b0",
+    strip_prefix = "rules_vendor-0.1.2",
 )
-load("@com_activestate_rules_vendor//rules_vendor-0.1.1:def.bzl", "vendor_dependencies", "vendor_generate")
+load("@com_activestate_rules_vendor//:def.bzl", "vendor_dependencies", "vendor_generate")
 vendor_dependencies()
 
 vendor_generate(
@@ -71,7 +72,7 @@ these lines:
 
 ```
 bazel run //:gazelle
-find . -name BUILD.bazel | xargs sed -i bak 's/\"\/\/vendor/\"@vendor\/\/vendor/'
+find . -name BUILD.bazel | xargs sed -ibak 's/\"\/\/vendor/\"@vendor\/\/vendor/'
 find . -name BUILD.bazelbak -delete
 ```
 
