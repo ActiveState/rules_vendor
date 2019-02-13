@@ -36,7 +36,7 @@ def _vendor_generate_impl(ctx):
 
     # Gimme a vendor directory!
     if vendor_dir != "":
-        cmds = ["cp", "-r", vendor_dir, "."]
+        cmds = ["cp", "-a", vendor_dir, "."]
         result = env_execute(ctx, cmds, environment={"GOPATH": gopath})
         if result.return_code:
             fail("Can't copy vendor directory: %s" % result.stderr)
