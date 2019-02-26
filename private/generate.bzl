@@ -31,8 +31,9 @@ def _vendor_generate_impl(ctx):
     # in a way that we can access the files for our `cp` command down below.
     vendor_dir = locate_vendor_dir(lock_file)
 
-    print("Import path of package will be %s" % importpath)
-    print("Vendor pacakges are at %s" % vendor_dir)
+    if ctx.attr.debug:
+        print("Import path of package will be %s" % importpath)
+        print("Vendor pacakges are at %s" % vendor_dir)
 
     # Gimme a vendor directory!
     if vendor_dir != "":
@@ -51,7 +52,9 @@ def _vendor_generate_impl(ctx):
     result = env_execute(ctx, cmds)
     if result and result.return_code:
       fail("gazelle failed to generate BUILD files for: %s" % result.stderr)
-    print("Gazelle generated BUILD.bazel files for vendor package")
+
+    if ctx.attr.debug:
+        print("Gazelle generated BUILD.bazel files for vendor package")
 
 vendor_generate = repository_rule(
     implementation = _vendor_generate_impl,
@@ -68,6 +71,7 @@ vendor_generate = repository_rule(
             executable = True,
             cfg = "host",
         ),
+        "debug": attr.bool(default = False),
     },
 )
 
@@ -132,16 +136,6 @@ def debug_printfile(ctx, filename):
         print("%s does not exist" % filename)
     else:
         print(title + result.stdout)
-
-def debug_vendor_version(ctx, vendor_bin):
-    """Return the version and commit hash of the vendor binary (if available)."""
-    cmds = [vendor_bin, "version"]
-    result = env_execute(ctx, cmds)
-    if result.return_code:
-        print("unable to run vendor: %s" % result.stderr)
-        return "version: unknown"
-    else:
-        return " ".join(result.stdout.splitlines())
 
 def env_execute(ctx, arguments, environment = None, **kwargs):
     """Execute a shell command with the ability to set environment variables."""
