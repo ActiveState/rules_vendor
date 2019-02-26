@@ -42,9 +42,9 @@ vendor directory:
 ```python
 http_archive(
     name = "com_activestate_rules_vendor",
-    urls = ["https://github.com/ActiveState/rules_vendor/archive/v0.1.2.tar.gz"],
-    sha256 = "c579de9fc84951fd0a6043888726e1f31f560ffb81a329694cc6f409da0cc0b0",
-    strip_prefix = "rules_vendor-0.1.2",
+    urls = ["https://github.com/ActiveState/rules_vendor/archive/v0.1.3.tar.gz"],
+    sha256 = "2f87901be842aac9d1327299dd3016d05752351498ab1b26f132c1a592ee4946",
+    strip_prefix = "rules_vendor-0.1.3",
 )
 load("@com_activestate_rules_vendor//:def.bzl", "vendor_dependencies", "vendor_generate")
 vendor_dependencies()
