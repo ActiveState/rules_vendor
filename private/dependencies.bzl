@@ -1,4 +1,2 @@
-load("@bazel_gazelle//:deps.bzl", "go_repository")
-
-def vendor_dependencies():
-    print("Generating vendor package for Bazel")
+def vendor_dependencies(DEBUG = False):
+    """ Does nothing currently. """

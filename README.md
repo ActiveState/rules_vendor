@@ -62,6 +62,10 @@ In the `BUILD.bazel` file at your project root, add the following:
 exports_files(["Gopkg.lock", "Gopkg.yaml"])
 ```
 
+This should also work fine exporting `go.mod` and `go.sum` if you are using
+Go Modules instead of dep.  Just change the corresponding `src` label in your
+WORKSPACE `vendor_generate` to match.
+
 ### Caveats
 
 Ideally this will be paired with an extension to
@@ -72,7 +76,7 @@ these lines:
 
 ```
 bazel run //:gazelle
-find . -name BUILD.bazel | xargs sed -ibak 's/\"\/\/vendor/\"@vendor\/\/vendor/'
+find . -name BUILD.bazel | xargs sed -ibak 's%"//vendor%"@vendor//vendor%'
 find . -name BUILD.bazelbak -delete
 ```
 
