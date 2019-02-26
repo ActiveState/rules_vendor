@@ -19,9 +19,8 @@ def _vendor_generate_impl(ctx):
     # Location for generated package
     importpath = ctx.attr.importpath
 
-
     # GOPATH environment variable is set to this during generation to make Go tools happy
-    gopath = ctx.path('')
+    gopath = ctx.path("")
 
     # Locate the nearest vendor directory (if one exists) starting from the
     # location of the vendor spec file.  This is sort of awful from a Bazel
@@ -38,20 +37,29 @@ def _vendor_generate_impl(ctx):
     # Gimme a vendor directory!
     if vendor_dir != "":
         cmds = ["cp", "-a", vendor_dir, "."]
-        result = env_execute(ctx, cmds, environment={"GOPATH": gopath})
+        result = env_execute(ctx, cmds, environment = {"GOPATH": gopath})
         if result.return_code:
             fail("Can't copy vendor directory: %s" % result.stderr)
 
     # Don't do this for now:
     # ctx.file("vendor/BUILD.bazel", content=_VENDOR_GENERATED_VENDOR_BUILD_FILE, executable = False)
 
-    ctx.file("BUILD.bazel", content=_VENDOR_GENERATED_ROOT_BUILD_FILE, executable = False)
+    ctx.file("BUILD.bazel", content = _VENDOR_GENERATED_ROOT_BUILD_FILE, executable = False)
 
-    cmds = [gazelle_bin, '--go_prefix', importpath, '--mode', 'fix',
-            '--repo_root', gopath, "--external", "vendored"]
+    cmds = [
+        gazelle_bin,
+        "--go_prefix",
+        importpath,
+        "--mode",
+        "fix",
+        "--repo_root",
+        gopath,
+        "--external",
+        "vendored",
+    ]
     result = env_execute(ctx, cmds)
     if result and result.return_code:
-      fail("gazelle failed to generate BUILD files for: %s" % result.stderr)
+        fail("gazelle failed to generate BUILD files for: %s" % result.stderr)
 
     if ctx.attr.debug:
         print("Gazelle generated BUILD.bazel files for vendor package")
@@ -59,24 +67,38 @@ def _vendor_generate_impl(ctx):
 vendor_generate = repository_rule(
     implementation = _vendor_generate_impl,
     attrs = {
-        "importpath": attr.string(mandatory = True),
-        "src": attr.label(
+        "importpath": attr.string(
+            doc = "Go prefix of import paths in the current workspace",
             mandatory = True,
-            allow_files = FileType([".json", ".yml"]),
-            single_file = True,
+        ),
+        "src": attr.label(
+            doc = "Label location for Gopkg.lock or go.mod",
+            mandatory = True,
+            allow_files = True,
+            allow_single_file = True,
         ),
         "_gazelle": attr.label(
             default = Label("@bazel_gazelle_go_repository_tools//:bin/gazelle"),
-            single_file = True,
+            allow_single_file = True,
             executable = True,
             cfg = "host",
         ),
-        "debug": attr.bool(default = False),
+        "debug": attr.bool(
+            doc = "Toggle debugging output to console during build",
+            default = False,
+        ),
     },
 )
 
 def scan_dir(d):
-    """Look in the supplied directory for a vendor or WORKSPACE entry."""
+    """Look in the supplied directory for a vendor or WORKSPACE entry.
+
+    Args:
+      d: full path to directory to be scanned.
+
+    Returns:
+      Success (boolean) and Full Path.
+    """
     success = False
     path = ""
 
@@ -84,20 +106,27 @@ def scan_dir(d):
         # vendor exists, this is our match.  Return it to the caller as success
         path = d.get_child("vendor")
         success = True
-    else:
-        if d.get_child("WORKSPACE").exists:
-            # We should stop looking if we've reached the workspace root
-            path = ""
-            success = True
+    elif d.get_child("WORKSPACE").exists:
+        # We should stop looking if we've reached the workspace root
+        path = ""
+        success = True
 
     return (success, path)
 
 def locate_vendor_dir(d):
-    """Walk backwards through the filesystem looking for a vendor directory."""
+    """Walk backwards through the filesystem looking for a vendor directory.
+
+    Args:
+      d: full path to directory to be scanned.
+
+    Returns:
+      Full Path if successful, empty string if not.
+    """
+
     # Bazel does not allow unbounded loops, so we fake it by iterating through
-    # a list.  The length of our list is the effective "max depth" we will 
+    # a list.  The length of our list is the effective "max depth" we will
     # crawl looking for our vendor directory.
-    for _ in ["","","","","","","","","","","",""]:
+    for _ in ["", "", "", "", "", "", "", "", "", "", "", ""]:
         (ok, path) = scan_dir(d)
         if ok:
             return path
@@ -108,37 +137,19 @@ def locate_vendor_dir(d):
     # No vendor directory found
     return ""
 
-def debug_listfiles(ctx, path = "."):
-    """List all files contained in path (and nested directories)."""
-    title = "All files in '%s':\n" % path
-    result = ctx.execute(["find", path])
-    if result.return_code:
-        print(title+result.stderr)
-    else:
-        print(title+result.stdout)
-
-def debug_search(ctx, searchstring):
-    """Recursive file search for any files containing supplied string."""
-    title = "Files containing '%s':\n" % searchstring
-    cmds = ["grep", "-r", searchstring, "."]
-    result = env_execute(ctx, cmds)
-    if result.return_code:
-        fail("failed to debug_search: %s" % result.stderr)
-    else:
-        print(title+result.stdout)
-
-def debug_printfile(ctx, filename):
-    """Output the contents of the requested file."""
-    title = "Contents of '%s':\n" % filename
-    cmds = ["cat", filename]
-    result = env_execute(ctx, cmds)
-    if result.return_code:
-        print("%s does not exist" % filename)
-    else:
-        print(title + result.stdout)
-
 def env_execute(ctx, arguments, environment = None, **kwargs):
-    """Execute a shell command with the ability to set environment variables."""
+    """Execute a shell command with the ability to set environment variables.
+
+    Args:
+      ctx: Current context
+      arguments: Command line to run (list of strings)
+      environment: Environment variables to be created (optional)
+      **kwargs: Additional arguments passed directly to ctx.execute
+
+    Returns:
+      Returns the return code of ctx.execute called.
+    """
+
     env_args = ["env", "-i"]
 
     if environment:
