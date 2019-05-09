@@ -74,7 +74,6 @@ vendor_generate = repository_rule(
         "src": attr.label(
             doc = "Label location for Gopkg.lock or go.mod",
             mandatory = True,
-            allow_files = True,
             allow_single_file = True,
         ),
         "_gazelle": attr.label(
