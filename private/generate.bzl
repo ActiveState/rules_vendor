@@ -46,6 +46,17 @@ def _vendor_generate_impl(ctx):
 
     ctx.file("BUILD.bazel", content = _VENDOR_GENERATED_ROOT_BUILD_FILE, executable = False)
 
+    if ctx.attr.remove_vendor_build:
+        cmds = [
+            "find",
+            "-name",
+            "BUILD.bazel",
+            "-delete",
+        ]
+        result = env_execute(ctx, cmds)
+        if result and result.return_code:
+            fail("failed to remove vendor BUILD files: %s" % result.stderr)
+
     cmds = [
         gazelle_bin,
         "--go_prefix",
@@ -57,6 +68,13 @@ def _vendor_generate_impl(ctx):
         "--external",
         "vendored",
     ]
+
+    if ctx.attr.disable_protobuf_generation:
+        cmds += [
+            "--proto",
+            "disable_global",
+        ]
+
     result = env_execute(ctx, cmds)
     if result and result.return_code:
         fail("gazelle failed to generate BUILD files for: %s" % result.stderr)
@@ -84,6 +102,14 @@ vendor_generate = repository_rule(
         ),
         "debug": attr.bool(
             doc = "Toggle debugging output to console during build",
+            default = False,
+        ),
+        "disable_protobuf_generation": attr.bool(
+            doc = "Disable autogeneration of protobufs when running gazelle",
+            default = False,
+        ),
+        "remove_vendor_build": attr.bool(
+            doc = "Remove vendor BUILD.bazel files before running gazelle",
             default = False,
         ),
     },
